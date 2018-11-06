@@ -48,7 +48,7 @@ return [
 
         'sqlite' => [
             'driver' => 'sqlite',
-            'database' => env('DB_DATABASE', database_path('myVideoSystem.sqlite')),
+            'database' => env('DB_DATABASE', database_path('mydatabase.sqlite')),
             'prefix' => '',
         ],
 

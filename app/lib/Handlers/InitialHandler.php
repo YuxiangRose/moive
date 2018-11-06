@@ -1,17 +1,31 @@
 <?php
-namespace App\lib;
+namespace App\lib\Handlers;
+
+use App\lib\ApiConnector\MVDB;
+use Illuminate\Support\Facades\DB;
 
 class InitialHandler
 {
-    function __construct(
-        MVDB $mvdb
-    )
+    private $mvdb;
+
+    function __construct()
     {
-        $this->client = $mvdb;
+        $this->mvdb = new MVDB();
     }
 
     public function init()
     {
-        var_dump('34234fdfl;kdsf');
+        $this->initGenreMovieList();
+    }
+
+    private function initGenreMovieList()
+    {
+        $genreList = $this->mvdb->getGenreMovieList();
+        foreach($genreList as $genre) {
+            DB::table('genres')->insert([
+                'id' => $genre->id,
+                'name' => $genre->name
+            ]);
+        }
     }
 }

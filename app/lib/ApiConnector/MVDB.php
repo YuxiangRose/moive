@@ -1,4 +1,6 @@
 <?php
+namespace App\lib\ApiConnector;
+
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Client;
 
@@ -15,19 +17,63 @@ Class MVDB
         $this->client = new Client();
     }
 
-    private function getMovieSearchResaut($movieName)
+    public function getMovieSearchResult($movieName)
     {
-        $uri = BASEURL.'search/movie?'.APIKEY.LANGUAGE.'query='.$movieName;
-        $res = $this->client->request('GET', $uri);
+        $uri = self::BASEURL . 'search/movie?' . self::APIKEY . self::LANGUAGE . '&query=' . $movieName;
+        $res = $this->client->request('GET', $uri, ['verify'=> false]);
 
-        return $res;
+        $movieDetails = json_decode($res->getBody());
+
+        return $movieDetails;
     }
 
-    private function getGenreMoiveList()
+    public function getMovieDetailsById($movieId)
     {
-        $uri = BASEURL.'/genre/movie/list?'.APIKEY.LANGUAGE;
-        $res = $this->client->request('GET', $uri);
+        $uri = self::BASEURL . 'movie/'.$movieId.'?' . self::APIKEY . self::LANGUAGE;
+        $res = $this->client->request('GET', $uri, ['verify'=> false]);
 
-        return $res;
+        $movieDetails = json_decode($res->getBody());
+
+        return $movieDetails;
+    }
+
+    public function getGenreMovieList()
+    {
+        $uri = self::BASEURL . 'genre/movie/list?' . self::APIKEY. self::LANGUAGE;
+        $res = $this->client->request('GET', $uri, ['verify'=> false]);
+
+        $genreList = json_decode($res->getBody())->genres;
+
+        return $genreList;
+    }
+
+    public function getMoviePosterByLanguage($MovieId, $language)
+    {
+        $uri = self::BASEURL . 'movie/'.$MovieId.'/images?' . self::APIKEY .'&include_image_language='. $language. ',null,en';
+        $res = $this->client->request('GET', $uri, ['verify'=> false]);
+
+        $posters = json_decode($res->getBody())->posters;
+
+        return $posters;
+    }
+
+    public function getShowsSearchResult($showName)
+    {
+        $uri = self::BASEURL . 'search/tv?' . self::APIKEY . self::LANGUAGE . '&query=' . $showName;
+        $res = $this->client->request('GET', $uri, ['verify'=> false]);
+
+        $showDetails = json_decode($res->getBody());
+
+        return $showDetails;
+    }
+
+    public function getShowsDetailsById($showId)
+    {
+        $uri = self::BASEURL . 'tv/'.$showId.'?' . self::APIKEY . self::LANGUAGE;
+        $res = $this->client->request('GET', $uri, ['verify'=> false]);
+
+        $showDetails = json_decode($res->getBody());
+
+        return $showDetails;
     }
 }

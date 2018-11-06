@@ -1,0 +1,5 @@
+<?php
+
+return [
+    'imageFilePath' => 'fklsjfklsdjflsd'
+];
