@@ -13,10 +13,17 @@ class ShowDetailsController extends Controller
 
     public function __construct()
     {
-        $this->languages = [
+        $this->languages =  [
             'zh' => '中文',
             'en' => '英文',
-            'cn' => '粤语'
+            'cn' => '粤语',
+            'fr' => '法语',
+            'ko' => '韩语',
+            'ja' => '日语',
+            'de' => '德语',
+            'es' => '西班牙语',
+            'it' => '意大利语',
+            'hi' => '印地语',
         ];
     }
 

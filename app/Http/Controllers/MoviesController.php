@@ -56,4 +56,17 @@ class MoviesController extends Controller
 
         return view('movie-all')->with('data', $viewModel);
     }
+
+    public function searchByLanguage(
+        Request $request,
+        MoviesAllQueryHandler $moviesAllQueryHandler,
+        MoviesAllViewModel $moviesAllViewModel
+    )
+    {
+        $language  = trim($request->input('language'));
+        $data = $moviesAllQueryHandler->getMoviesByLanguage($language);
+        $viewModel = $moviesAllViewModel->build($data);
+
+        return view('movie-all')->with('data', $viewModel);
+    }
 }

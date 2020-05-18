@@ -122,11 +122,13 @@
                     </div>
                     <div class="tags">
                         <ul class="tag-list">
-                            @foreach($data->genres as $key => $genre)
-                                <li class="movie-tag" id="{{$key}}">
-                                    {{$genre}}
-                                </li>
-                            @endforeach
+                            @if($data->genres)
+                                @foreach($data->genres as $key => $genre)
+                                    <li class="movie-tag" id="{{$key}}">
+                                        {{$genre}}
+                                    </li>
+                                @endforeach
+                            @endif
                         </ul>
                     </div>
                 </div>

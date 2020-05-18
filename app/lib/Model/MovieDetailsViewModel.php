@@ -62,9 +62,11 @@ class MovieDetailsViewModel
         $this->revenue = $movie->revenue;
         $this->rating = $movie->rating;
 
-        foreach($genres as $genre)
-        {
-            $this->genres[$genre->id] = utf8_encode($genre->name);
+        if($genres) {
+            foreach($genres as $genre)
+            {
+                $this->genres[$genre->id] = utf8_encode($genre->name);
+            }
         }
 
         return $this;

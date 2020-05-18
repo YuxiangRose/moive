@@ -16,6 +16,7 @@ class WishingListViewModel
         }
 
         $this->movies = $data['movies'];
+        $this->total = count($data['movies']);
 
         return $this;
     }

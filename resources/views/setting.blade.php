@@ -121,6 +121,33 @@
             </div>
             <div id="sync-show"><span>同步</span></div>
         </div>
+
+
+
+
+
+
+
+
+        <div class="clear-container">
+            <div class="title-container">
+                <div class="left title">
+                    清理图片缓存：
+                </div>
+            </div>
+            <div class="content-container" id="clear">
+            </div>
+            <div id="clear-buff" class="clear-buff-btn"><span>清除</span></div>
+        </div>
+
+
+
+
+
+
+
+
+
         {{--<div class="movie-container">--}}
             {{--<div class="title-container">--}}
                 {{--<div class="left title">--}}

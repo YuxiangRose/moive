@@ -15,7 +15,14 @@ class MoviesAllQueryHandler
         $this->languages = [
             'zh' => '中文',
             'en' => '英文',
-            'cn' => '粤语'
+            'cn' => '粤语',
+            'fr' => '法语',
+            'ko' => '韩语',
+            'ja' => '日语',
+            'de' => '德语',
+            'es' => '西班牙语',
+            'it' => '意大利语',
+            'hi' => '印地语',
         ];
     }
 
@@ -35,11 +42,21 @@ class MoviesAllQueryHandler
     public function getMoviesByName($name)
     {
         $status = 'non';
-        $movies = DB::table('movies')
+        
+        if(\substr($name,0,1) === '!') {
+            $name = \substr($name,1);
+            $movies = DB::table('movies')
+            ->select('id','title','poster_path')
+            ->where('title', $name)
+            ->orderBy('release_date','desc')
+            ->get();
+        } else {
+            $movies = DB::table('movies')
             ->select('id','title','poster_path')
             ->where('title','like', '%'.$name.'%')
             ->orderBy('release_date','desc')
             ->get();
+        }
         if(count($movies) > 0) {
             $status = 'local_search';
         } else {
@@ -89,14 +106,30 @@ class MoviesAllQueryHandler
         ];
     }
 
+    public function getMoviesByLanguage($language)
+    {
+        $movies = DB::table('movies')
+            ->select('id','title','poster_path')
+            ->where('original_language', 'like', '%'.$language.'%')
+            ->orderBy('release_date','desc')
+            ->get();
+        
+        return [
+            'movies' => $movies,
+            'status' => $language
+        ];
+    }
+
     private function getMoviesByNameFromMVDB($name)
     {
         $mvdb = new MVDB();
         $results = $mvdb->getMovieSearchResult($name)->results;
+        
         $movies = [];
 
         foreach ($results as $movieDetails)
         {
+            $noPoster = false;
             $movieId = $movieDetails->id ? $movieDetails->id : NULL;
             $title = $movieDetails->title ? $movieDetails->title : NULL;
             $language = $movieDetails->original_language;
@@ -104,14 +137,25 @@ class MoviesAllQueryHandler
             {
                 $language = 'zh';
             }
+
             $posters = $mvdb->getMoviePosterByLanguage($movieId,$language);
-            $filePath = $posters[0]->file_path;
+            if(count($posters)){
+                $filePath = $posters[0]->file_path;
+            } else {
+                $noPoster = true;
+                //$filePath = '/pic-404.png';
+                $filePath = '/pic-404.jpg';
+            }
             $exists = Storage::disk()->exists('public/poster'.$filePath);
             if (!$exists){
-                $url = 'https://image.tmdb.org/t/p/w300/'.$filePath;
-                $contents = file_get_contents($url);
-                Storage::put('public/poster'.$filePath, $contents);
-                $exists = Storage::disk()->exists('public/poster'.$filePath);
+                if($noPoster) {
+                    $exists = true;
+                } else {
+                    $url = 'https://image.tmdb.org/t/p/w300/'.$filePath;
+                    $contents = file_get_contents($url);
+                    Storage::put('public/poster'.$filePath, $contents);
+                    $exists = Storage::disk()->exists('public/poster'.$filePath);
+                }
             }
 //            $exists = Storage::disk()->exists('public/poster'.$filePath);
 //            $url = 'https://image.tmdb.org/t/p/w300/'.$movieDetails->poster_path;

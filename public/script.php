@@ -1,5 +1,7 @@
 <?php
 
-exec("taskkill /F /im QQplayer.exe");
-$command = 'QQplayer '.$_POST['path'];
+CONST PLAYERNAME = 'QQplayer.exe';
+
+exec("taskkill /F /im ". PLAYERNAME);
+$command = PLAYERNAME . ' ' .$_POST['path'];
 exec($command);

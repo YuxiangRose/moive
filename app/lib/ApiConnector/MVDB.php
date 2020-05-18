@@ -49,10 +49,20 @@ Class MVDB
 
     public function getMoviePosterByLanguage($MovieId, $language)
     {
-        $uri = self::BASEURL . 'movie/'.$MovieId.'/images?' . self::APIKEY .'&include_image_language='. $language. ',null,en';
+        $uri = self::BASEURL . 'movie/'.$MovieId.'/images?' . self::APIKEY;
+        if ($language) {
+            $uri = $uri .'&include_image_language='. $language. ',null,en';
+        }
+
         $res = $this->client->request('GET', $uri, ['verify'=> false]);
 
         $posters = json_decode($res->getBody())->posters;
+
+        if(count($posters) == 0) {
+            $uri = self::BASEURL . 'movie/'.$MovieId.'/images?' . self::APIKEY;
+            $res = $this->client->request('GET', $uri, ['verify'=> false]);
+            $posters = json_decode($res->getBody())->posters;
+        }
 
         return $posters;
     }

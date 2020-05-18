@@ -19,11 +19,18 @@ class SettingApiController extends BaseController
 
     public function __construct()
     {
-        $this->avaliableFormat = array('mp4', 'rmvb', 'mkv', 'avi');
-        $this->languages = [
+        $this->avaliableFormat = array('mp4', 'rmvb', 'mkv', 'avi', 'flv');
+        $this->languages =  [
             'zh' => '中文',
             'en' => '英文',
-            'cn' => '粤语'
+            'cn' => '粤语',
+            'fr' => '法语',
+            'ko' => '韩语',
+            'ja' => '日语',
+            'de' => '德语',
+            'es' => '西班牙语',
+            'it' => '意大利语',
+            'hi' => '印地语',
         ];
         $this->mvdb = new MVDB();
     }
@@ -126,7 +133,6 @@ class SettingApiController extends BaseController
         if (count($folders) > 0) {
             foreach ($folders as $folder) {
                 $files = self::rglob($folder . '/*', 0);
-
                 foreach ($files as $key => $file) {
                     $ext = pathinfo($file, PATHINFO_EXTENSION);
                     if (is_dir($file) || !in_array($ext, $this->avaliableFormat)) {
@@ -138,11 +144,33 @@ class SettingApiController extends BaseController
                     $movies = array_merge($movies, $files);
                 }
             }
+
+            /**
+             * debug code for looking un match number folder and movies
+             */
+//            $count = 0;
+//            var_dump(count($movies));
+//
+//            foreach ($movies as $movie) {
+//                $movie = str_replace('/', '\\', $movie);
+//                if(!DB::table('movies')->where('path', $movie)->first()) {
+//                    var_dump($movie);
+//                }
+//                $count++;
+//            }
+//
+//            dd($count);
+            /**
+             *
+             */
+
+            DB::table('fail_sync_movies')->truncate();
             foreach ($movies as $movie) {
                 $movie = str_replace('/', '\\', $movie);
                 $name = $this->getFileName($movie);
                 $year = '';
                 if (!DB::table('movies')->where('path', $movie)->first()) {
+    
                     if(strpos($name,'_')) {
                         $year = substr($name, strpos($name,'_')+1, 4);
                         $name = substr($name, 0, strpos($name,'_'));
@@ -150,26 +178,46 @@ class SettingApiController extends BaseController
 
                     $results = $this->mvdb->getMovieSearchResult($name)->results;
                     if (isset($results[0])) {
+                        $posterPath = false;
                         $movieId = $results[0]->id ? $results[0]->id : NULL;
 
-                        if ($results[0]->title != $name){
-                            foreach ($results as $result){
-                                if($result->title == $name){
+                        if ($results[0]->title != $name) {
+                            foreach ($results as $result) {
+                                if ($result->title == $name) {
                                     $movieId = $result->id;
                                     break;
                                 }
                             }
-                        } else {
-                            if($year != '') {
-                                foreach ($results as $result){
-                                    if(strpos($result->release_date, $year) !== false){
-                                        $movieId = $result->id;
-                                        break;
-                                    }
+                        }
+
+                        if($year != '') {
+                            foreach ($results as $result){
+                                if(strpos($result->release_date, $year) !== false){
+                                    $movieId = $result->id;
+                                    break;
                                 }
                             }
                         }
-                        $posterPath = false;
+
+
+//                        if ($results[0]->title != $name){
+//                            foreach ($results as $result){
+//                                if($result->title == $name){
+//                                    $movieId = $result->id;
+//                                    break;
+//                                }
+//                            }
+//                        } else {
+//                            if($year != '') {
+//                                foreach ($results as $result){
+//                                    if(strpos($result->release_date, $year) !== false){
+//                                        $movieId = $result->id;
+//                                        break;
+//                                    }
+//                                }
+//                            }
+//                        }
+
                         if ($movieId) {
                             $movieDetails = $this->mvdb->getMovieDetailsById($movieId);
                         } else {
@@ -229,6 +277,13 @@ class SettingApiController extends BaseController
                                     $synced++;
                                 } else {
                                     $ignore++;
+                                    $failedMovie = DB::table('fail_sync_movies')->where('path',$movie)->first();
+                                    if(!$failedMovie) {
+                                        DB::table('fail_sync_movies')->insert([
+                                            'path' => $movie,
+                                            'name' => $name
+                                        ]);
+                                    }
                                 }
                             }
                         } else {
@@ -247,19 +302,28 @@ class SettingApiController extends BaseController
                     usleep(500000);
                 } else {
                     $ignore++;
+//                    $failedMovie = DB::table('fail_sync_movies')->where('path',$movie)->first();
+//                    if(!$failedMovie) {
+//                        DB::table('fail_sync_movies')->insert([
+//                            'path' => $movie,
+//                            'name' => $name
+//                        ]);
+//                    }
                 }
             }
-            foreach ($folders as $folder) {
+            if ($failed == 0) {
+                foreach ($folders as $folder) {
 //                $stat = stat($folder);
-                if(isset($updatedTime[$folder])){
+                    if(isset($updatedTime[$folder])){
 //                    dd('423432432');
-                    $lastSynced = $updatedTime[$folder];
-                    DB::table('resource_folder')
-                        ->where('path', $folder)
-                        ->update([
-                            'init' => 0,
-                            'updated_at' => $lastSynced
-                        ]);
+                        $lastSynced = $updatedTime[$folder];
+                        DB::table('resource_folder')
+                            ->where('path', $folder)
+                            ->update([
+                                'init' => 0,
+                                'updated_at' => $lastSynced
+                            ]);
+                    }
                 }
             }
 
@@ -303,6 +367,7 @@ class SettingApiController extends BaseController
         if (count($folders) > 0) {
             foreach ($folders as $folder) {
                 $shows = glob($folder . '\*', GLOB_ONLYDIR);
+                
                 foreach ($shows as $show) {
                     $posterPath = false;
                     $name = $this->getShowName($show);
@@ -312,6 +377,7 @@ class SettingApiController extends BaseController
                         $name = substr($name, 0, strpos($name,'_'));
                     }
                     $results = $this->mvdb->getShowsSearchResult($name)->results;
+                    
                     if (isset($results[0])) {
                         $showId = $results[0]->id ? $results[0]->id : NULL;
 
@@ -366,7 +432,7 @@ class SettingApiController extends BaseController
                                     foreach ($showDetails->seasons as $season) {
                                         $seasonInDB = DB::table('seasons')->where('season_id', $season->id)->first();
                                         if (!$season->poster_path) {
-                                            $seasonPoster = '/no_image.jpg';
+                                            $seasonPoster = '/pic-404.jpg';
                                         }else {
                                             $seasonPoster = $this->getShowPosterAndStore($season->poster_path);
                                         }
@@ -411,9 +477,13 @@ class SettingApiController extends BaseController
                                 //$seasonSynced = DB::table('seasons')->where('show_id', $showDetails->id)->get();
                                 foreach ($showDetails->seasons as $season) {
                                     $checkSynced = DB::table('seasons')->where('season_id', $season->id)->get();
-                                    if (count($checkSynced) == 0 && $season->season_number > 0) {
+                                    if (count($checkSynced) == 0 && $season->season_number > 0 && $season->air_date && $season->air_date < date('Y-m-d')) {
                                         $seasonPoster = false;
-                                        $seasonPoster = $this->getShowPosterAndStore($season->poster_path);
+                                        if (!$season->poster_path) {
+                                            $seasonPoster = '/pic-404.jpg';
+                                        } else {
+                                            $seasonPoster = $this->getShowPosterAndStore($season->poster_path);
+                                        }
                                         DB::table('seasons')->insert([
                                             'show_id' => $showDetails->id,
                                             'air_date' => $season->air_date,
@@ -598,6 +668,9 @@ class SettingApiController extends BaseController
         if ($language == 'zh' || $language == 'cn') {
             $language = 'zh';
         }
+        if (!in_array($language, $this->languages)) {
+            $language = null;
+        }
         $posters = $this->mvdb->getMoviePosterByLanguage($movieId, $language);
         if(isset($posters[0])){
             $filePath = $posters[0]->file_path;
@@ -609,7 +682,7 @@ class SettingApiController extends BaseController
                 $exists = Storage::disk()->exists('public/poster' . $filePath);
             }
         } else {
-            $filePath = '/no_image.jpg';
+            $filePath = '/pic-404.jpg';
             $exists = Storage::disk()->exists('public/poster' . $filePath);
         }
 
@@ -731,5 +804,24 @@ class SettingApiController extends BaseController
                 $this->allFolders[] = $folder;
             }
         }
+    }
+
+    public function clearBuff(){
+        $moviePostersInUse = DB::table('movies')->pluck('poster_path');
+        $seasonPostersInUse = DB::table('seasons')->pluck('poster_path');
+        $showPostersInUse = DB::table('shows')->pluck('poster_path');
+        $postersInUse = $moviePostersInUse->merge($seasonPostersInUse)->merge($showPostersInUse);
+        $files = Storage::allFiles('public/poster');
+        $counter = 0;
+        foreach($files as $file){
+            $fileName = \str_replace('public/poster', '', $file);
+            $inUse = $postersInUse->contains($fileName);
+            if (!$inUse && $fileName != 'pic-404.jpg'){
+                Storage::delete($file);
+                $counter++;
+            }
+        }
+
+        return $counter;
     }
 }

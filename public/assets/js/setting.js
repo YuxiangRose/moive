@@ -121,7 +121,19 @@ $(document).ready(function(){
                 }
             });
         }
+    });
+
+    $('#clear-buff').click(function (){
+        $.ajax({
+            type: 'GET',
+            url: 'index.php/api/clear_buff',
+            success: function(data) {
+                
+            }
+        });
     })
+        
+    
 
     $('#sync-show').click(function () {
         if($(this).hasClass('sync')){

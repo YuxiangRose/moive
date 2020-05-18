@@ -18,9 +18,11 @@ class MovieDetailsQueryHandler
                         ->join('movie_genres', 'movie_genres.genre_id', '=', 'genres.id')
                         ->join('movies', 'movies.id', '=', 'movie_genres.movie_id')
                         ->where('movie_id',$movieId)->get();
-        $moviePath = $movieDetails->path;
-        if(!$this->checkMovieExisting($moviePath)) {
-            $movieDetails = DB::table('movies')->where('id',$movieId)->first();
+        if($movieDetails){
+            $moviePath = $movieDetails->path;
+            if(!$this->checkMovieExisting($moviePath)) {
+                $movieDetails = DB::table('movies')->where('id',$movieId)->first();
+            }
         }
 
         return [

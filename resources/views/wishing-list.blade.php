@@ -64,6 +64,9 @@
             <div class="left title">
                 愿望清单：
             </div>
+            <div class="right total-movies">
+                共 {{$data->total}} 部电影
+            </div>
         </div>
         <div class="content-container">
             @foreach($data->movies as $movie)

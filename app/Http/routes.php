@@ -52,6 +52,12 @@ Route::group(['prefix' => 'movies'], function () {
             'as'  => 'searchByCollection'
         ]
     );
+    Route::get('/searchByLanguage',
+        [
+            'uses' => 'MoviesController@searchByLanguage',
+            'as'  => 'searchByLanguage'
+        ]
+    );
 });
 
 Route::group(['prefix' => 'shows'], function () {
@@ -151,6 +157,12 @@ Route::get('api/sync_show',[
         'uses' => 'Api\SettingApiController@syncShow',
         'as'  => 'api.setting.sync.show'
     ]
+);
+
+Route::get('api/clear_buff',[
+    'uses' => 'Api\SettingApiController@clearBuff',
+    'as'  => 'api.setting.clear.buff'
+]
 );
 
 Route::get('api/add_movie_to_wishing_list',[
