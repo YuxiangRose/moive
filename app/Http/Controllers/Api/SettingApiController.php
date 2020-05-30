@@ -160,6 +160,21 @@ class SettingApiController extends BaseController
 //            }
 //
 //            dd($count);
+            // $result = DB::table('movies')->select('path')->where('waiting', 0)->get();
+            // $test = json_decode(json_encode($result), true);
+            // $paths = [];
+            // $files = [];
+            // foreach($test as $i) {
+            //     $paths[] = $i['path'];
+            // }
+            
+            // foreach ($movies as $movie) {
+            //     $movie = str_replace('/', '\\', $movie);
+            //     $files[] = $movie;
+            // }
+           
+            // var_dump(array_diff($paths,$files));
+            // var_dump('dfsf');die;
             /**
              *
              */
@@ -170,7 +185,6 @@ class SettingApiController extends BaseController
                 $name = $this->getFileName($movie);
                 $year = '';
                 if (!DB::table('movies')->where('path', $movie)->first()) {
-    
                     if(strpos($name,'_')) {
                         $year = substr($name, strpos($name,'_')+1, 4);
                         $name = substr($name, 0, strpos($name,'_'));
@@ -189,10 +203,10 @@ class SettingApiController extends BaseController
                                 }
                             }
                         }
-
+                        
                         if($year != '') {
                             foreach ($results as $result){
-                                if(strpos($result->release_date, $year) !== false){
+                                if(strpos($result->release_date, $year) !== false && $result->title == $name){
                                     $movieId = $result->id;
                                     break;
                                 }
