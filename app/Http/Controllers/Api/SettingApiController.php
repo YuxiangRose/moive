@@ -165,14 +165,21 @@ class SettingApiController extends BaseController
             // $paths = [];
             // $files = [];
             // foreach($test as $i) {
-            //     $paths[] = $i['path'];
+            //     $paths[] = $i['path']; 
             // }
             
             // foreach ($movies as $movie) {
             //     $movie = str_replace('/', '\\', $movie);
             //     $files[] = $movie;
             // }
-           
+            
+            // var_dump(count($paths)); //779
+            // var_dump(count($files)); //780
+            // foreach($paths as $path) {
+            //     $key = array_search($path,$files);
+            //     unset($files[$key]);
+            // }
+            // var_dump($files);die;
             // var_dump(array_diff($paths,$files));
             // var_dump('dfsf');die;
             /**
